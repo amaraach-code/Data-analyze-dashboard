@@ -39,21 +39,15 @@
                         <label class="text-sm font-semibold text-orange-700">Гараар оруулах (Тест):</label>
                         <input type="file" id="csvFileInput" accept=".csv" class="text-sm text-gray-500">
                     </div>
-                    <button onclick="exportPDF()" class="px-5 py-2.5 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow transition mt-2">📥 PDF Татах</button>
+                    <button onclick="exportPDF()" class="px-5 py-2.5 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow transition">📥 PDF Татах</button>
                 </div>
             </header>
 
             <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-6 flex flex-wrap gap-4 items-center no-print" id="filterSection" style="display: none;">
                 <span class="font-bold text-gray-700">🔍 Шүүлтүүр:</span>
-                <select id="filterGender" onchange="applyFilters()" class="border border-gray-300 rounded p-2 text-sm bg-gray-50 focus:ring focus:ring-blue-200 outline-none">
-                    <option value="all">Бүх хүйс</option><option value="female">Эмэгтэй</option><option value="male">Эрэгтэй</option>
-                </select>
-                <select id="filterAge" onchange="applyFilters()" class="border border-gray-300 rounded p-2 text-sm bg-gray-50 focus:ring focus:ring-blue-200 outline-none">
-                    <option value="all">Бүх нас</option><option value="18-24">18-24</option><option value="25-29">25-29</option><option value="30-34">30-34</option><option value="35-39">35-39</option><option value="40-44">40-44</option><option value="45-49">45-49</option><option value="50-54">50-54</option><option value="55-59">55-59</option><option value="60+">60+</option>
-                </select>
-                <select id="filterDistrict" onchange="applyFilters()" class="border border-gray-300 rounded p-2 text-sm bg-gray-50 focus:ring focus:ring-blue-200 outline-none">
-                    <option value="all">Бүх дүүрэг</option>
-                </select>
+                <select id="filterGender" onchange="applyFilters()" class="border border-gray-300 rounded p-2 text-sm bg-gray-50 outline-none"><option value="all">Бүх хүйс</option><option value="female">Эмэгтэй</option><option value="male">Эрэгтэй</option></select>
+                <select id="filterAge" onchange="applyFilters()" class="border border-gray-300 rounded p-2 text-sm bg-gray-50 outline-none"><option value="all">Бүх нас</option><option value="18-24">18-24</option><option value="25-29">25-29</option><option value="30-34">30-34</option><option value="35-39">35-39</option><option value="40-44">40-44</option><option value="45-49">45-49</option><option value="50-54">50-54</option><option value="55-59">55-59</option><option value="60+">60+</option></select>
+                <select id="filterDistrict" onchange="applyFilters()" class="border border-gray-300 rounded p-2 text-sm bg-gray-50 outline-none"><option value="all">Бүх дүүрэг</option></select>
                 <span class="text-sm text-gray-500 font-medium ml-auto" id="filteredCountText"></span>
             </div>
 
@@ -65,14 +59,14 @@
             </div>
 
             <div class="flex flex-wrap space-x-2 bg-white p-2 rounded-xl shadow-sm mb-6 w-full md:w-max border border-gray-100 no-print">
-                <button class="tab-btn active px-4 py-2 text-sm font-medium text-gray-600 focus:outline-none" onclick="openTab('tab-insight', this)">Гүнзгий Анализ</button>
-                <button class="tab-btn px-4 py-2 text-sm font-medium text-gray-600 focus:outline-none" onclick="openTab('tab-demo', this)">Хүн ам зүй</button>
-                <button class="tab-btn px-4 py-2 text-sm font-medium text-gray-600 focus:outline-none" onclick="openTab('tab-score', this)">Оноо & Салбар</button>
-                <button class="tab-btn px-4 py-2 text-sm font-medium text-gray-600 focus:outline-none" onclick="openTab('tab-extra', this)">Нэмэлт Анализ</button>
-                <button class="tab-btn px-4 py-2 text-sm font-medium text-gray-600 focus:outline-none" onclick="openTab('tab-business', this)">Бизнес Анализ</button>
-                <button class="tab-btn px-4 py-2 text-sm font-medium text-red-600 focus:outline-none bg-red-50 border border-red-100 rounded-lg" onclick="openTab('tab-risk', this)">⚠️ Эрсдэл</button>
-                <button class="tab-btn px-4 py-2 text-sm font-medium text-emerald-600 focus:outline-none bg-emerald-50 border border-emerald-100 rounded-lg" onclick="openTab('tab-treemap', this)">🟩 Treemap</button>
-                <button class="tab-btn px-4 py-2 text-sm font-medium text-indigo-600 focus:outline-none bg-indigo-50 border border-indigo-100 rounded-lg" onclick="openTab('tab-table', this)">👑 VIP Тайлан</button>
+                <button class="tab-btn active px-4 py-2 text-sm font-medium" onclick="openTab('tab-insight', this)">Гүнзгий Анализ</button>
+                <button class="tab-btn px-4 py-2 text-sm font-medium" onclick="openTab('tab-demo', this)">Хүн ам зүй</button>
+                <button class="tab-btn px-4 py-2 text-sm font-medium" onclick="openTab('tab-score', this)">Оноо & Салбар</button>
+                <button class="tab-btn px-4 py-2 text-sm font-medium" onclick="openTab('tab-extra', this)">Нэмэлт Анализ</button>
+                <button class="tab-btn px-4 py-2 text-sm font-medium" onclick="openTab('tab-business', this)">Бизнес Анализ</button>
+                <button class="tab-btn px-4 py-2 text-sm font-medium text-red-600 bg-red-50 rounded-lg" onclick="openTab('tab-risk', this)">⚠️ Эрсдэл</button>
+                <button class="tab-btn px-4 py-2 text-sm font-medium text-emerald-600 bg-emerald-50 rounded-lg" onclick="openTab('tab-treemap', this)">🟩 Treemap</button>
+                <button class="tab-btn px-4 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 rounded-lg" onclick="openTab('tab-table', this)">👑 VIP Тайлан</button>
             </div>
 
             <div id="tab-insight" class="tab-content active"><div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6"><div class="card"><h2 class="text-lg font-bold mb-4">Орлого ба Зээлийн эрхийн хамаарал</h2><div class="relative h-[300px] w-full"><canvas id="scatterChart"></canvas></div></div><div class="card"><h2 class="text-lg font-bold mb-4">Харилцагч нэмэгдсэн хандлага</h2><div class="relative h-[300px] w-full"><canvas id="trendChart"></canvas></div></div></div></div>
@@ -80,7 +74,7 @@
             <div id="tab-score" class="tab-content"><div class="grid grid-cols-1 lg:grid-cols-2 gap-6"><div class="card"><h2 class="text-lg font-bold mb-4">Зээлийн онооны тархалт</h2><div class="relative h-[300px] w-full"><canvas id="scoreChart"></canvas></div></div><div class="card"><h2 class="text-lg font-bold mb-4">Үйл ажиллагааны чиглэл (Топ 10)</h2><div class="relative h-[300px] w-full"><canvas id="industryChart"></canvas></div></div></div></div>
             <div id="tab-extra" class="tab-content"><div class="grid grid-cols-1 lg:grid-cols-2 gap-6"><div class="card"><h2 class="text-lg font-bold mb-4">Дүүргийн тархалт</h2><div class="relative h-[300px] w-full"><canvas id="districtChart"></canvas></div></div><div class="card"><h2 class="text-lg font-bold mb-4">Дундаж зээлийн эрх (Насны бүлгээр)</h2><div class="relative h-[300px] w-full"><canvas id="loanByAgeChart"></canvas></div></div><div class="card"><h2 class="text-lg font-bold mb-4">Дундаж зээлийн оноо (Насны бүлгээр)</h2><div class="relative h-[300px] w-full"><canvas id="scoreByAgeChart"></canvas></div></div><div class="card"><h2 class="text-lg font-bold mb-4">Зээлийн үлдэгдэлтэй харилцагчид</h2><div class="relative h-[300px] w-full"><canvas id="outstandingChart"></canvas></div></div></div></div>
             <div id="tab-business" class="tab-content"><div class="grid grid-cols-1 lg:grid-cols-2 gap-6"><div class="card"><h2 class="text-lg font-bold mb-4">Зээлийн үлдэгдэлтэй vs Үлдэгдэлгүй</h2><div class="relative h-[300px] w-full"><canvas id="hasOutstandingChart"></canvas></div></div><div class="card"><h2 class="text-lg font-bold mb-4">Зээлийн онооны өөрчлөлт</h2><div class="relative h-[300px] w-full"><canvas id="scoreChangeChart"></canvas></div></div><div class="card"><h2 class="text-lg font-bold mb-4">Салбаруудын дундаж зээлийн эрх</h2><div class="relative h-[300px] w-full"><canvas id="industryAvgLoanChart"></canvas></div></div><div class="card"><h2 class="text-lg font-bold mb-4">Сар бүрийн дундаж эрх</h2><div class="relative h-[300px] w-full"><canvas id="timelineAvgLoanChart"></canvas></div></div></div></div>
-            <div id="tab-treemap" class="tab-content"><div class="card"><div class="flex justify-between items-center mb-4"><h2 class="text-xl font-bold">Үйл ажиллагааны чиглэл (Бүх салбар)</h2></div><div class="relative h-[600px] w-full"><canvas id="treemapChart"></canvas></div></div></div>
+            <div id="tab-treemap" class="tab-content"><div class="card"><h2 class="text-xl font-bold mb-4">Үйл ажиллагааны чиглэл (Бүх салбар)</h2><div class="relative h-[600px] w-full"><canvas id="treemapChart"></canvas></div></div></div>
             <div id="tab-risk" class="tab-content"><div class="grid grid-cols-1 lg:grid-cols-2 gap-6"><div class="card"><h2 class="text-lg font-bold mb-4">Өрийн дарамтын харьцаа (DTI)</h2><div class="relative h-[300px] w-full"><canvas id="dtiChart"></canvas></div></div><div class="card"><h2 class="text-lg font-bold mb-4">Оноо унасан салбарууд</h2><div class="relative h-[300px] w-full"><canvas id="riskIndustryChart"></canvas></div></div></div></div>
 
             <div id="tab-table" class="tab-content">
@@ -93,7 +87,7 @@
                 </div>
 
                 <div class="border-t-4 border-indigo-500 pt-8 mt-12 bg-white p-6 rounded-xl shadow-sm">
-                    <div class="mb-8"><h2 class="text-3xl font-extrabold text-indigo-700">👑 VIP Харилцагчдын Гүнзгий Анализ</h2><p class="text-gray-500 mt-2">Зөвхөн Топ 50 хүмүүсийн өгөгдлөөр зурагдсан болно.</p></div>
+                    <div class="mb-8"><h2 class="text-3xl font-extrabold text-indigo-700">👑 VIP Харилцагчдын Гүнзгий Анализ</h2></div>
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                         <div class="card bg-gray-50"><h2 class="text-lg font-bold mb-4 text-indigo-900">VIP: Орлого ба Зээлийн эрх</h2><div class="relative h-[300px] w-full"><canvas id="vip_scatterChart"></canvas></div></div>
                         <div class="card bg-gray-50"><h2 class="text-lg font-bold mb-4 text-indigo-900">VIP: Батлагдсан хандлага</h2><div class="relative h-[300px] w-full"><canvas id="vip_trendChart"></canvas></div></div>
@@ -126,18 +120,18 @@
         let globalRawData = [];
         let charts = {};
 
-        // 1. GITHUB PAGES CACHE BUSTER - Файлыг байнга шинээр татна
+        // 1. УНШИХ ҮЙЛДЭЛ
         window.addEventListener('load', () => {
-            const csvUrl = "./data.csv?nocache=" + new Date().getTime(); // Файлын зам болон Cache устгагч
+            const csvUrl = "./data.csv?nocache=" + new Date().getTime();
             Papa.parse(csvUrl, {
                 download: true,
                 header: true, 
                 skipEmptyLines: true,
+                transformHeader: function(h) { return h.trim(); }, // ХАМГИЙН ЧУХАЛ: Зайнуудыг цэвэрлэх!
                 complete: function(results) {
-                    // Баталгаажуулалт: Үнэхээр дата мөн үү? 404 хуудас биш биз?
                     if(results.data && results.data.length > 0 && results.data[0]['user[user_id]'] !== undefined) {
                         globalRawData = results.data;
-                        document.getElementById('statusText').innerText = "✅ Дата автоматаар амжилттай уншлаа! (GitHub mode)";
+                        document.getElementById('statusText').innerText = "✅ Дата амжилттай уншлаа! (GitHub)";
                         document.getElementById('statusText').classList.replace('text-blue-600', 'text-green-600');
                         initializeDashboard();
                     } else {
@@ -145,7 +139,7 @@
                     }
                 },
                 error: function(err) {
-                    showUploadFallback("Файл татаж чадсангүй. Local-аас шалгаж байна уу?");
+                    showUploadFallback("Файл татаж чадсангүй. Гараар оруулна уу.");
                 }
             });
         });
@@ -160,13 +154,13 @@
             const file = e.target.files[0];
             if (!file) return;
             document.getElementById('statusText').innerText = "Уншиж байна...";
-            document.getElementById('statusText').classList.replace('text-orange-600', 'text-blue-600');
             Papa.parse(file, {
                 header: true, skipEmptyLines: true,
+                transformHeader: function(h) { return h.trim(); }, // Зайг устгах
                 complete: function(results) {
                     globalRawData = results.data;
-                    document.getElementById('statusText').innerText = "✅ Файлаас амжилттай уншлаа! (Local mode)";
-                    document.getElementById('statusText').classList.replace('text-blue-600', 'text-green-600');
+                    document.getElementById('statusText').innerText = "✅ Файлаас амжилттай уншлаа! (Local)";
+                    document.getElementById('statusText').classList.replace('text-orange-600', 'text-green-600');
                     initializeDashboard();
                 }
             });
@@ -190,8 +184,6 @@
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('print-show-all'));
             window.print();
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('print-show-all'));
-            let activeTabBtn = document.querySelector('.tab-btn.active');
-            if(activeTabBtn) activeTabBtn.click();
         }
 
         function parseNum(str) { if (!str) return 0; return parseFloat(str.toString().replace(/,/g, '').trim()) || 0; }
@@ -205,11 +197,7 @@
             });
             const select = document.getElementById('filterDistrict');
             select.innerHTML = '<option value="all">Бүх дүүрэг</option>';
-            Array.from(districtSet).sort().forEach(dist => {
-                let opt = document.createElement('option');
-                opt.value = dist; opt.innerText = dist;
-                select.appendChild(opt);
-            });
+            Array.from(districtSet).sort().forEach(dist => { select.appendChild(new Option(dist, dist)); });
         }
 
         function applyFilters() {
@@ -218,15 +206,13 @@
             let fDist = document.getElementById('filterDistrict').value;
 
             let filteredData = globalRawData.filter(row => {
-                let match = true;
                 let rGen = (row['user[gender]'] || '').toLowerCase();
                 let rAge = row['user[Age Range]'] || '';
                 let rDist = row['user[district_name]'] || '';
-
-                if (fGender !== 'all' && rGen !== fGender && rGen !== (fGender==='male'?'эр':'эм')) match = false;
-                if (fAge !== 'all' && rAge !== fAge) match = false;
-                if (fDist !== 'all' && rDist !== fDist) match = false;
-                return match;
+                if (fGender !== 'all' && rGen !== fGender && rGen !== (fGender==='male'?'эр':'эм')) return false;
+                if (fAge !== 'all' && rAge !== fAge) return false;
+                if (fDist !== 'all' && rDist !== fDist) return false;
+                return true;
             });
 
             document.getElementById('filteredCountText').innerText = `Шүүгдсэн: ${filteredData.length} харилцагч`;
@@ -245,7 +231,8 @@
             let dtiC = { '0% (Өргүй)': 0, '<20%': 0, '20-40%': 0, '40-60%': 0, '>60%': 0 }, indSDrp = {}, tData = [];
 
             data.forEach(r => {
-                let inc=parseNum(r[' user[income] ']), loan=parseNum(r[' user[loan_limit] ']), age=r['user[Age Range]']||'Тодорхойгүй';
+                // transformHeader ажилласан тул зайн асуудалгүй болсон
+                let inc=parseNum(r['user[income]']), loan=parseNum(r['user[loan_limit]']), age=r['user[Age Range]']||'Тодорхойгүй';
                 let out=parseNum(r['user[outstanding]']), ind=r['user[Industry_category]']||'Тодорхойгүй';
                 let lSco=parseInt(r['user[initial_score_latest]']), iSco=parseInt(r['user[initial_score_max]']);
                 
@@ -286,10 +273,10 @@
             drawBr(pre+'industryAvgLoanChart', Object.fromEntries(Object.entries(aLI).sort((a,b)=>b[1]-a[1]).slice(0,10)), isVip?['#312e81']:['#6366f1'], true); drawLn(pre+'timelineAvgLoanChart', aLT, isVip?'#4f46e5':'#8b5cf6', isVip?'rgba(79,70,229,0.2)':'rgba(139,92,246,0.2)');
             drawTr(pre+'treemapChart', indC); drawBr(pre+'dtiChart', dtiC, isVip?['#db2777']:['#ef4444'], false); drawBr(pre+'riskIndustryChart', Object.fromEntries(Object.entries(indSDrp).sort((a,b)=>b[1]-a[1]).slice(0,10)), isVip?['#9d174d']:['#b91c1c'], true);
 
+            // VIP хүмүүсийн графикийг зурна
             if(!isVip && tData.length > 0) processAdvancedData(tData.slice(0,50).map(i=>i.row), true);
         }
 
-        // CHART WRAPPERS (ГАЗАР ХЭМНЭСЭН БИЧИГЛЭЛ)
         function dest(id) { if(charts[id]) charts[id].destroy(); }
         function drawSc(id, d, v) { let e=document.getElementById(id); if(!e)return; dest(id); charts[id]=new Chart(e.getContext('2d'),{type:'scatter',data:{datasets:[{label:'Орлого vs Зээл',data:d,backgroundColor:v?'rgba(79,70,229,0.5)':'rgba(59,130,246,0.5)',borderColor:v?'#4f46e5':'#3b82f6'}]},options:{responsive:true,maintainAspectRatio:false}}); }
         function drawLn(id, d, cL, cB) { let e=document.getElementById(id); if(!e)return; dest(id); charts[id]=new Chart(e.getContext('2d'),{type:'line',data:{labels:Object.keys(d),datasets:[{label:'Утга',data:Object.values(d),borderColor:cL,backgroundColor:cB,fill:true,tension:0.4}]},options:{responsive:true,maintainAspectRatio:false}}); }
