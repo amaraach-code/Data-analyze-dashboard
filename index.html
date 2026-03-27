@@ -1,290 +1,243 @@
 <!DOCTYPE html>
 <html lang="mn">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Харилцагчийн Гүнзгий Анализ Dashboard</title>
+    <meta charset="UTF-8"><title>Харилцагчийн Дата Анализ</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-treemap"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
-        .tab-content { display: none; opacity: 0; transition: opacity 0.3s ease-in-out; }
-        .tab-content.active { display: block; opacity: 1; }
-        .tab-btn { transition: all 0.2s; }
-        .tab-btn.active { background-color: #111827; color: #ffffff; border-radius: 0.5rem; }
-        .card { background: white; border-radius: 1rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); padding: 1.5rem; }
-        @media print {
-            body { background-color: white; }
-            .no-print { display: none !important; }
-            .print-show-all { display: block !important; opacity: 1 !important; page-break-after: always; }
-            .card { box-shadow: none; border: 1px solid #e5e7eb; break-inside: avoid; }
-            canvas { max-width: 100% !important; }
-        }
+        body{background:#f3f4f6;font-family:sans-serif;} .tab-content{display:none;} .tab-content.active{display:block;}
+        .tab-btn.active{background:#111827;color:#fff;border-radius:0.5rem;} 
+        .card{background:#fff;border-radius:1rem;padding:1.5rem;box-shadow:0 4px 6px -1px rgba(0,0,0,0.1);}
+        @media print{ .no-print{display:none!important;} .print-show-all{display:block!important;page-break-after:always;} canvas{max-width:100%!important;} }
     </style>
 </head>
 <body class="text-gray-800">
     <div class="min-h-screen flex flex-col">
         <div class="flex-1 p-8 w-full max-w-7xl mx-auto">
             
-            <header class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4 bg-white p-6 rounded-xl shadow-sm border border-gray-100 no-print">
+            <header class="flex justify-between items-center mb-6 bg-white p-6 rounded-xl shadow-sm no-print">
                 <div>
-                    <h1 class="text-3xl font-bold text-gray-900">Харилцагчийн Дата Анализ</h1>
+                    <h1 class="text-3xl font-bold">Харилцагчийн Дата Анализ</h1>
                     <p class="text-blue-600 font-medium mt-1" id="statusText">Уншиж байна. Түр хүлээнэ үү...</p>
                 </div>
                 <div class="flex flex-col items-end gap-2">
-                    <div id="fallbackUpload" style="display: none;" class="flex items-center gap-2 bg-orange-50 p-2 rounded border border-orange-200">
-                        <label class="text-sm font-semibold text-orange-700">Гараар оруулах (Тест):</label>
-                        <input type="file" id="csvFileInput" accept=".csv" class="text-sm text-gray-500">
+                    <div id="fallbackUpload" style="display:none;" class="flex items-center gap-2 bg-orange-50 p-2 rounded">
+                        <label class="text-sm font-semibold text-orange-700">Серверээс олдсонгүй, гараар оруулах:</label>
+                        <input type="file" id="csvFileInput" accept=".csv" class="text-sm">
                     </div>
-                    <button onclick="exportPDF()" class="px-5 py-2.5 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow transition">📥 PDF Татах</button>
+                    <button onclick="exportPDF()" class="px-5 py-2 text-sm font-bold text-white bg-indigo-600 rounded shadow">📥 PDF Татах</button>
                 </div>
             </header>
 
-            <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-6 flex flex-wrap gap-4 items-center no-print" id="filterSection" style="display: none;">
-                <span class="font-bold text-gray-700">🔍 Шүүлтүүр:</span>
-                <select id="filterGender" onchange="applyFilters()" class="border border-gray-300 rounded p-2 text-sm bg-gray-50 outline-none"><option value="all">Бүх хүйс</option><option value="female">Эмэгтэй</option><option value="male">Эрэгтэй</option></select>
-                <select id="filterAge" onchange="applyFilters()" class="border border-gray-300 rounded p-2 text-sm bg-gray-50 outline-none"><option value="all">Бүх нас</option><option value="18-24">18-24</option><option value="25-29">25-29</option><option value="30-34">30-34</option><option value="35-39">35-39</option><option value="40-44">40-44</option><option value="45-49">45-49</option><option value="50-54">50-54</option><option value="55-59">55-59</option><option value="60+">60+</option></select>
-                <select id="filterDistrict" onchange="applyFilters()" class="border border-gray-300 rounded p-2 text-sm bg-gray-50 outline-none"><option value="all">Бүх дүүрэг</option></select>
-                <span class="text-sm text-gray-500 font-medium ml-auto" id="filteredCountText"></span>
+            <div class="bg-white p-4 rounded-xl shadow-sm mb-6 flex flex-wrap gap-4 items-center no-print" id="filterSection" style="display:none;">
+                <span class="font-bold">🔍 Шүүлтүүр:</span>
+                <select id="filterGender" onchange="applyFilters()" class="border p-2 text-sm rounded"><option value="all">Бүх хүйс</option><option value="female">Эмэгтэй</option><option value="male">Эрэгтэй</option></select>
+                <select id="filterAge" onchange="applyFilters()" class="border p-2 text-sm rounded"><option value="all">Бүх нас</option><option value="18-24">18-24</option><option value="25-29">25-29</option><option value="30-34">30-34</option><option value="35-39">35-39</option><option value="40-44">40-44</option><option value="45-49">45-49</option><option value="50-54">50-54</option><option value="55-59">55-59</option><option value="60+">60+</option></select>
+                <select id="filterDistrict" onchange="applyFilters()" class="border p-2 text-sm rounded"><option value="all">Бүх дүүрэг</option></select>
+                <span class="text-sm text-gray-500 ml-auto" id="filteredCountText"></span>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8" id="kpiCards" style="display: none;">
-                <div class="card border-l-4 border-blue-500"><h3 class="text-sm font-semibold text-gray-500 uppercase">Нийт Харилцагч</h3><p class="text-3xl font-bold text-gray-900 mt-2" id="kpiTotal">-</p></div>
-                <div class="card border-l-4 border-green-500"><h3 class="text-sm font-semibold text-gray-500 uppercase">Дундаж Орлого</h3><p class="text-3xl font-bold text-gray-900 mt-2" id="kpiAvgIncome">-</p></div>
-                <div class="card border-l-4 border-purple-500"><h3 class="text-sm font-semibold text-gray-500 uppercase">Дундаж Зээлийн Эрх</h3><p class="text-3xl font-bold text-gray-900 mt-2" id="kpiAvgLoan">-</p></div>
-                <div class="card border-l-4 border-orange-500"><h3 class="text-sm font-semibold text-gray-500 uppercase">Шинэ харилцагч</h3><p class="text-3xl font-bold text-gray-900 mt-2" id="kpiNewUsers">-</p></div>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8" id="kpiCards" style="display:none;">
+                <div class="card border-l-4 border-blue-500"><h3 class="text-sm text-gray-500">Нийт Харилцагч</h3><p class="text-3xl font-bold mt-2" id="kpiTotal">-</p></div>
+                <div class="card border-l-4 border-green-500"><h3 class="text-sm text-gray-500">Дундаж Орлого</h3><p class="text-3xl font-bold mt-2" id="kpiAvgIncome">-</p></div>
+                <div class="card border-l-4 border-purple-500"><h3 class="text-sm text-gray-500">Дундаж Зээлийн Эрх</h3><p class="text-3xl font-bold mt-2" id="kpiAvgLoan">-</p></div>
+                <div class="card border-l-4 border-orange-500"><h3 class="text-sm text-gray-500">Шинэ харилцагч</h3><p class="text-3xl font-bold mt-2" id="kpiNewUsers">-</p></div>
             </div>
 
-            <div class="flex flex-wrap space-x-2 bg-white p-2 rounded-xl shadow-sm mb-6 w-full md:w-max border border-gray-100 no-print">
-                <button class="tab-btn active px-4 py-2 text-sm font-medium" onclick="openTab('tab-insight', this)">Гүнзгий Анализ</button>
-                <button class="tab-btn px-4 py-2 text-sm font-medium" onclick="openTab('tab-demo', this)">Хүн ам зүй</button>
-                <button class="tab-btn px-4 py-2 text-sm font-medium" onclick="openTab('tab-score', this)">Оноо & Салбар</button>
-                <button class="tab-btn px-4 py-2 text-sm font-medium" onclick="openTab('tab-extra', this)">Нэмэлт Анализ</button>
-                <button class="tab-btn px-4 py-2 text-sm font-medium" onclick="openTab('tab-business', this)">Бизнес Анализ</button>
-                <button class="tab-btn px-4 py-2 text-sm font-medium text-red-600 bg-red-50 rounded-lg" onclick="openTab('tab-risk', this)">⚠️ Эрсдэл</button>
-                <button class="tab-btn px-4 py-2 text-sm font-medium text-emerald-600 bg-emerald-50 rounded-lg" onclick="openTab('tab-treemap', this)">🟩 Treemap</button>
-                <button class="tab-btn px-4 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 rounded-lg" onclick="openTab('tab-table', this)">👑 VIP Тайлан</button>
+            <div class="flex flex-wrap space-x-2 bg-white p-2 rounded-xl shadow-sm mb-6 no-print">
+                <button class="tab-btn active px-4 py-2 text-sm" onclick="openTab('tab-insight', this)">Гүнзгий Анализ</button>
+                <button class="tab-btn px-4 py-2 text-sm" onclick="openTab('tab-demo', this)">Хүн ам зүй</button>
+                <button class="tab-btn px-4 py-2 text-sm" onclick="openTab('tab-score', this)">Оноо & Салбар</button>
+                <button class="tab-btn px-4 py-2 text-sm" onclick="openTab('tab-extra', this)">Нэмэлт Анализ</button>
+                <button class="tab-btn px-4 py-2 text-sm" onclick="openTab('tab-business', this)">Бизнес Анализ</button>
+                <button class="tab-btn px-4 py-2 text-sm text-red-600 bg-red-50 rounded" onclick="openTab('tab-risk', this)">⚠️ Эрсдэл</button>
+                <button class="tab-btn px-4 py-2 text-sm text-emerald-600 bg-emerald-50 rounded" onclick="openTab('tab-treemap', this)">🟩 Treemap</button>
+                <button class="tab-btn px-4 py-2 text-sm text-indigo-600 bg-indigo-50 rounded" onclick="openTab('tab-table', this)">👑 VIP Тайлан</button>
             </div>
 
-            <div id="tab-insight" class="tab-content active"><div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6"><div class="card"><h2 class="text-lg font-bold mb-4">Орлого ба Зээлийн эрхийн хамаарал</h2><div class="relative h-[300px] w-full"><canvas id="scatterChart"></canvas></div></div><div class="card"><h2 class="text-lg font-bold mb-4">Харилцагч нэмэгдсэн хандлага</h2><div class="relative h-[300px] w-full"><canvas id="trendChart"></canvas></div></div></div></div>
-            <div id="tab-demo" class="tab-content"><div class="grid grid-cols-1 lg:grid-cols-3 gap-6"><div class="card lg:col-span-2"><h2 class="text-lg font-bold mb-4">Насны бүлэг ба Хүйсийн харьцаа</h2><div class="relative h-[300px] w-full"><canvas id="ageGenderChart"></canvas></div></div><div class="card"><h2 class="text-lg font-bold mb-4">Орлогын бүлэг</h2><div class="relative h-[300px] w-full"><canvas id="incomeChart"></canvas></div></div></div></div>
-            <div id="tab-score" class="tab-content"><div class="grid grid-cols-1 lg:grid-cols-2 gap-6"><div class="card"><h2 class="text-lg font-bold mb-4">Зээлийн онооны тархалт</h2><div class="relative h-[300px] w-full"><canvas id="scoreChart"></canvas></div></div><div class="card"><h2 class="text-lg font-bold mb-4">Үйл ажиллагааны чиглэл (Топ 10)</h2><div class="relative h-[300px] w-full"><canvas id="industryChart"></canvas></div></div></div></div>
-            <div id="tab-extra" class="tab-content"><div class="grid grid-cols-1 lg:grid-cols-2 gap-6"><div class="card"><h2 class="text-lg font-bold mb-4">Дүүргийн тархалт</h2><div class="relative h-[300px] w-full"><canvas id="districtChart"></canvas></div></div><div class="card"><h2 class="text-lg font-bold mb-4">Дундаж зээлийн эрх (Насны бүлгээр)</h2><div class="relative h-[300px] w-full"><canvas id="loanByAgeChart"></canvas></div></div><div class="card"><h2 class="text-lg font-bold mb-4">Дундаж зээлийн оноо (Насны бүлгээр)</h2><div class="relative h-[300px] w-full"><canvas id="scoreByAgeChart"></canvas></div></div><div class="card"><h2 class="text-lg font-bold mb-4">Зээлийн үлдэгдэлтэй харилцагчид</h2><div class="relative h-[300px] w-full"><canvas id="outstandingChart"></canvas></div></div></div></div>
-            <div id="tab-business" class="tab-content"><div class="grid grid-cols-1 lg:grid-cols-2 gap-6"><div class="card"><h2 class="text-lg font-bold mb-4">Зээлийн үлдэгдэлтэй vs Үлдэгдэлгүй</h2><div class="relative h-[300px] w-full"><canvas id="hasOutstandingChart"></canvas></div></div><div class="card"><h2 class="text-lg font-bold mb-4">Зээлийн онооны өөрчлөлт</h2><div class="relative h-[300px] w-full"><canvas id="scoreChangeChart"></canvas></div></div><div class="card"><h2 class="text-lg font-bold mb-4">Салбаруудын дундаж зээлийн эрх</h2><div class="relative h-[300px] w-full"><canvas id="industryAvgLoanChart"></canvas></div></div><div class="card"><h2 class="text-lg font-bold mb-4">Сар бүрийн дундаж эрх</h2><div class="relative h-[300px] w-full"><canvas id="timelineAvgLoanChart"></canvas></div></div></div></div>
-            <div id="tab-treemap" class="tab-content"><div class="card"><h2 class="text-xl font-bold mb-4">Үйл ажиллагааны чиглэл (Бүх салбар)</h2><div class="relative h-[600px] w-full"><canvas id="treemapChart"></canvas></div></div></div>
-            <div id="tab-risk" class="tab-content"><div class="grid grid-cols-1 lg:grid-cols-2 gap-6"><div class="card"><h2 class="text-lg font-bold mb-4">Өрийн дарамтын харьцаа (DTI)</h2><div class="relative h-[300px] w-full"><canvas id="dtiChart"></canvas></div></div><div class="card"><h2 class="text-lg font-bold mb-4">Оноо унасан салбарууд</h2><div class="relative h-[300px] w-full"><canvas id="riskIndustryChart"></canvas></div></div></div></div>
+            <div id="tab-insight" class="tab-content active"><div class="grid grid-cols-1 lg:grid-cols-2 gap-6"><div class="card"><h2 class="font-bold mb-4">Орлого ба Зээлийн эрх</h2><div class="relative h-[300px]"><canvas id="scatterChart"></canvas></div></div><div class="card"><h2 class="font-bold mb-4">Батлагдсан хандлага</h2><div class="relative h-[300px]"><canvas id="trendChart"></canvas></div></div></div></div>
+            <div id="tab-demo" class="tab-content"><div class="grid grid-cols-1 lg:grid-cols-3 gap-6"><div class="card lg:col-span-2"><h2 class="font-bold mb-4">Нас ба Хүйс</h2><div class="relative h-[300px]"><canvas id="ageGenderChart"></canvas></div></div><div class="card"><h2 class="font-bold mb-4">Орлогын бүлэг</h2><div class="relative h-[300px]"><canvas id="incomeChart"></canvas></div></div></div></div>
+            <div id="tab-score" class="tab-content"><div class="grid grid-cols-1 lg:grid-cols-2 gap-6"><div class="card"><h2 class="font-bold mb-4">Зээлийн оноо</h2><div class="relative h-[300px]"><canvas id="scoreChart"></canvas></div></div><div class="card"><h2 class="font-bold mb-4">Салбарын тархалт</h2><div class="relative h-[300px]"><canvas id="industryChart"></canvas></div></div></div></div>
+            <div id="tab-extra" class="tab-content"><div class="grid grid-cols-1 lg:grid-cols-2 gap-6"><div class="card"><h2 class="font-bold mb-4">Дүүргийн тархалт</h2><div class="relative h-[300px]"><canvas id="districtChart"></canvas></div></div><div class="card"><h2 class="font-bold mb-4">Дундаж эрх насаар</h2><div class="relative h-[300px]"><canvas id="loanByAgeChart"></canvas></div></div><div class="card"><h2 class="font-bold mb-4">Дундаж оноо насаар</h2><div class="relative h-[300px]"><canvas id="scoreByAgeChart"></canvas></div></div><div class="card"><h2 class="font-bold mb-4">Үлдэгдэл орлогоор</h2><div class="relative h-[300px]"><canvas id="outstandingChart"></canvas></div></div></div></div>
+            <div id="tab-business" class="tab-content"><div class="grid grid-cols-1 lg:grid-cols-2 gap-6"><div class="card"><h2 class="font-bold mb-4">Үлдэгдэлтэй эсэх</h2><div class="relative h-[300px]"><canvas id="hasOutstandingChart"></canvas></div></div><div class="card"><h2 class="font-bold mb-4">Онооны өөрчлөлт</h2><div class="relative h-[300px]"><canvas id="scoreChangeChart"></canvas></div></div><div class="card"><h2 class="font-bold mb-4">Салбаруудын дундаж зээл</h2><div class="relative h-[300px]"><canvas id="industryAvgLoanChart"></canvas></div></div><div class="card"><h2 class="font-bold mb-4">Сар бүрийн дундаж эрх</h2><div class="relative h-[300px]"><canvas id="timelineAvgLoanChart"></canvas></div></div></div></div>
+            <div id="tab-treemap" class="tab-content"><div class="card"><h2 class="font-bold mb-4">Үйл ажиллагааны чиглэл (Treemap)</h2><div class="relative h-[600px]"><canvas id="treemapChart"></canvas></div></div></div>
+            <div id="tab-risk" class="tab-content"><div class="grid grid-cols-1 lg:grid-cols-2 gap-6"><div class="card"><h2 class="font-bold mb-4">Өрийн дарамт (DTI)</h2><div class="relative h-[300px]"><canvas id="dtiChart"></canvas></div></div><div class="card"><h2 class="font-bold mb-4">Оноо унасан салбарууд</h2><div class="relative h-[300px]"><canvas id="riskIndustryChart"></canvas></div></div></div></div>
 
             <div id="tab-table" class="tab-content">
                 <div class="card overflow-x-auto mb-10">
                     <h2 class="text-xl font-bold mb-4">Топ 50 VIP Харилцагч</h2>
-                    <table class="w-full text-sm text-left text-gray-600 whitespace-nowrap">
-                        <thead class="text-xs text-gray-700 uppercase bg-gray-100"><tr><th class="px-4 py-3">ID</th><th class="px-4 py-3">Нас & Хүйс</th><th class="px-4 py-3">Дүүрэг</th><th class="px-4 py-3 text-right">Орлого</th><th class="px-4 py-3 text-right text-blue-600">Зээлийн Эрх</th><th class="px-4 py-3 text-right text-red-500">Үлдэгдэл</th><th class="px-4 py-3">Сүүлийн Оноо</th></tr></thead>
+                    <table class="w-full text-sm text-left">
+                        <thead class="bg-gray-100"><tr><th class="px-4 py-2">ID</th><th class="px-4 py-2">Нас/Хүйс</th><th class="px-4 py-2">Дүүрэг</th><th class="px-4 py-2 text-right">Орлого</th><th class="px-4 py-2 text-right text-blue-600">Эрх</th><th class="px-4 py-2 text-right text-red-500">Үлдэгдэл</th><th class="px-4 py-2">Оноо</th></tr></thead>
                         <tbody id="dataTableBody" class="divide-y divide-gray-200"></tbody>
                     </table>
                 </div>
-
                 <div class="border-t-4 border-indigo-500 pt-8 mt-12 bg-white p-6 rounded-xl shadow-sm">
-                    <div class="mb-8"><h2 class="text-3xl font-extrabold text-indigo-700">👑 VIP Харилцагчдын Гүнзгий Анализ</h2></div>
+                    <h2 class="text-2xl font-extrabold text-indigo-700 mb-6">👑 VIP Харилцагчдын Анализ (Зөвхөн Топ 50)</h2>
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                        <div class="card bg-gray-50"><h2 class="text-lg font-bold mb-4 text-indigo-900">VIP: Орлого ба Зээлийн эрх</h2><div class="relative h-[300px] w-full"><canvas id="vip_scatterChart"></canvas></div></div>
-                        <div class="card bg-gray-50"><h2 class="text-lg font-bold mb-4 text-indigo-900">VIP: Батлагдсан хандлага</h2><div class="relative h-[300px] w-full"><canvas id="vip_trendChart"></canvas></div></div>
+                        <div class="card bg-gray-50"><h2 class="font-bold mb-4 text-indigo-900">VIP: Орлого ба Зээл</h2><div class="relative h-[300px]"><canvas id="vip_scatterChart"></canvas></div></div>
+                        <div class="card bg-gray-50"><h2 class="font-bold mb-4 text-indigo-900">VIP: Батлагдсан хандлага</h2><div class="relative h-[300px]"><canvas id="vip_trendChart"></canvas></div></div>
                     </div>
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-                        <div class="card bg-gray-50 lg:col-span-2"><h2 class="text-lg font-bold mb-4 text-indigo-900">VIP: Нас ба Хүйс</h2><div class="relative h-[300px] w-full"><canvas id="vip_ageGenderChart"></canvas></div></div>
-                        <div class="card bg-gray-50"><h2 class="text-lg font-bold mb-4 text-indigo-900">VIP: Орлогын бүлэг</h2><div class="relative h-[300px] w-full"><canvas id="vip_incomeChart"></canvas></div></div>
+                        <div class="card bg-gray-50 lg:col-span-2"><h2 class="font-bold mb-4 text-indigo-900">VIP: Нас ба Хүйс</h2><div class="relative h-[300px]"><canvas id="vip_ageGenderChart"></canvas></div></div>
+                        <div class="card bg-gray-50"><h2 class="font-bold mb-4 text-indigo-900">VIP: Орлогын бүлэг</h2><div class="relative h-[300px]"><canvas id="vip_incomeChart"></canvas></div></div>
                     </div>
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                        <div class="card bg-gray-50"><h2 class="text-lg font-bold mb-4 text-indigo-900">VIP: Зээлийн оноо</h2><div class="relative h-[300px] w-full"><canvas id="vip_scoreChart"></canvas></div></div>
-                        <div class="card bg-gray-50"><h2 class="text-lg font-bold mb-4 text-indigo-900">VIP: Салбарын тархалт</h2><div class="relative h-[300px] w-full"><canvas id="vip_industryChart"></canvas></div></div>
-                        <div class="card bg-gray-50"><h2 class="text-lg font-bold mb-4 text-indigo-900">VIP: Дүүргийн тархалт</h2><div class="relative h-[300px] w-full"><canvas id="vip_districtChart"></canvas></div></div>
-                        <div class="card bg-gray-50"><h2 class="text-lg font-bold mb-4 text-indigo-900">VIP: Дундаж эрх насаар</h2><div class="relative h-[300px] w-full"><canvas id="vip_loanByAgeChart"></canvas></div></div>
-                        <div class="card bg-gray-50"><h2 class="text-lg font-bold mb-4 text-indigo-900">VIP: Дундаж оноо насаар</h2><div class="relative h-[300px] w-full"><canvas id="vip_scoreByAgeChart"></canvas></div></div>
-                        <div class="card bg-gray-50"><h2 class="text-lg font-bold mb-4 text-indigo-900">VIP: Үлдэгдэл орлогоор</h2><div class="relative h-[300px] w-full"><canvas id="vip_outstandingChart"></canvas></div></div>
-                        <div class="card bg-gray-50"><h2 class="text-lg font-bold mb-4 text-indigo-900">VIP: Үлдэгдэлтэй эсэх</h2><div class="relative h-[300px] w-full"><canvas id="vip_hasOutstandingChart"></canvas></div></div>
-                        <div class="card bg-gray-50"><h2 class="text-lg font-bold mb-4 text-indigo-900">VIP: Онооны өөрчлөлт</h2><div class="relative h-[300px] w-full"><canvas id="vip_scoreChangeChart"></canvas></div></div>
-                        <div class="card bg-gray-50"><h2 class="text-lg font-bold mb-4 text-indigo-900">VIP: Салбаруудын дундаж зээл</h2><div class="relative h-[300px] w-full"><canvas id="vip_industryAvgLoanChart"></canvas></div></div>
-                        <div class="card bg-gray-50"><h2 class="text-lg font-bold mb-4 text-indigo-900">VIP: Сар бүрийн дундаж эрх</h2><div class="relative h-[300px] w-full"><canvas id="vip_timelineAvgLoanChart"></canvas></div></div>
-                        <div class="card bg-gray-50"><h2 class="text-lg font-bold mb-4 text-indigo-900">VIP: Өрийн дарамт (DTI)</h2><div class="relative h-[300px] w-full"><canvas id="vip_dtiChart"></canvas></div></div>
-                        <div class="card bg-gray-50"><h2 class="text-lg font-bold mb-4 text-indigo-900">VIP: Оноо унасан салбарууд</h2><div class="relative h-[300px] w-full"><canvas id="vip_riskIndustryChart"></canvas></div></div>
+                        <div class="card bg-gray-50"><h2 class="font-bold mb-4 text-indigo-900">VIP: Зээлийн оноо</h2><div class="relative h-[300px]"><canvas id="vip_scoreChart"></canvas></div></div>
+                        <div class="card bg-gray-50"><h2 class="font-bold mb-4 text-indigo-900">VIP: Салбарын тархалт</h2><div class="relative h-[300px]"><canvas id="vip_industryChart"></canvas></div></div>
+                        <div class="card bg-gray-50"><h2 class="font-bold mb-4 text-indigo-900">VIP: Дүүргийн тархалт</h2><div class="relative h-[300px]"><canvas id="vip_districtChart"></canvas></div></div>
+                        <div class="card bg-gray-50"><h2 class="font-bold mb-4 text-indigo-900">VIP: Дундаж эрх насаар</h2><div class="relative h-[300px]"><canvas id="vip_loanByAgeChart"></canvas></div></div>
+                        <div class="card bg-gray-50"><h2 class="font-bold mb-4 text-indigo-900">VIP: Дундаж оноо насаар</h2><div class="relative h-[300px]"><canvas id="vip_scoreByAgeChart"></canvas></div></div>
+                        <div class="card bg-gray-50"><h2 class="font-bold mb-4 text-indigo-900">VIP: Үлдэгдэл орлогоор</h2><div class="relative h-[300px]"><canvas id="vip_outstandingChart"></canvas></div></div>
+                        <div class="card bg-gray-50"><h2 class="font-bold mb-4 text-indigo-900">VIP: Үлдэгдэлтэй эсэх</h2><div class="relative h-[300px]"><canvas id="vip_hasOutstandingChart"></canvas></div></div>
+                        <div class="card bg-gray-50"><h2 class="font-bold mb-4 text-indigo-900">VIP: Онооны өөрчлөлт</h2><div class="relative h-[300px]"><canvas id="vip_scoreChangeChart"></canvas></div></div>
+                        <div class="card bg-gray-50"><h2 class="font-bold mb-4 text-indigo-900">VIP: Салбаруудын дундаж зээл</h2><div class="relative h-[300px]"><canvas id="vip_industryAvgLoanChart"></canvas></div></div>
+                        <div class="card bg-gray-50"><h2 class="font-bold mb-4 text-indigo-900">VIP: Сар бүрийн дундаж эрх</h2><div class="relative h-[300px]"><canvas id="vip_timelineAvgLoanChart"></canvas></div></div>
+                        <div class="card bg-gray-50"><h2 class="font-bold mb-4 text-indigo-900">VIP: Өрийн дарамт (DTI)</h2><div class="relative h-[300px]"><canvas id="vip_dtiChart"></canvas></div></div>
+                        <div class="card bg-gray-50"><h2 class="font-bold mb-4 text-indigo-900">VIP: Оноо унасан салбарууд</h2><div class="relative h-[300px]"><canvas id="vip_riskIndustryChart"></canvas></div></div>
                     </div>
-                    <div class="card bg-gray-50 mb-6"><h2 class="text-lg font-bold mb-4 text-indigo-900">VIP: Салбарын дэлгэрэнгүй (Treemap)</h2><div class="relative h-[500px] w-full"><canvas id="vip_treemapChart"></canvas></div></div>
+                    <div class="card bg-gray-50"><h2 class="font-bold mb-4 text-indigo-900">VIP: Treemap</h2><div class="relative h-[500px]"><canvas id="vip_treemapChart"></canvas></div></div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        let globalRawData = [];
-        let charts = {};
+        let globalRawData = []; let charts = {};
 
-        // 1. УНШИХ ҮЙЛДЭЛ
         window.addEventListener('load', () => {
-            const csvUrl = "./data.csv?nocache=" + new Date().getTime();
-            Papa.parse(csvUrl, {
-                download: true,
-                header: true, 
-                skipEmptyLines: true,
-                transformHeader: function(h) { return h.trim(); }, // ХАМГИЙН ЧУХАЛ: Зайнуудыг цэвэрлэх!
-                complete: function(results) {
-                    if(results.data && results.data.length > 0 && results.data[0]['user[user_id]'] !== undefined) {
-                        globalRawData = results.data;
+            Papa.parse("data.csv?nocache=" + new Date().getTime(), {
+                download: true, header: true, skipEmptyLines: true,
+                transformHeader: h => h.trim(), // ХАМГИЙН ЧУХАЛ: ЗАЙГ ЦЭВЭРЛЭХ
+                complete: res => {
+                    if(res.data && res.data.length > 0 && res.data[0]['user[user_id]'] !== undefined) {
+                        globalRawData = res.data;
                         document.getElementById('statusText').innerText = "✅ Дата амжилттай уншлаа! (GitHub)";
-                        document.getElementById('statusText').classList.replace('text-blue-600', 'text-green-600');
-                        initializeDashboard();
-                    } else {
-                        showUploadFallback("Сервер дээр 'data.csv' олдсонгүй эсвэл формат буруу байна.");
-                    }
+                        document.getElementById('statusText').className = "text-green-600 font-medium mt-1";
+                        initDash();
+                    } else showFallback("CSV файлын формат буруу байна.");
                 },
-                error: function(err) {
-                    showUploadFallback("Файл татаж чадсангүй. Гараар оруулна уу.");
-                }
+                error: () => showFallback("Сервер дээр 'data.csv' олдсонгүй эсвэл хандалт хаагдсан.")
             });
         });
 
-        function showUploadFallback(msg) {
+        function showFallback(msg) {
             document.getElementById('statusText').innerText = msg;
-            document.getElementById('statusText').classList.replace('text-blue-600', 'text-orange-600');
+            document.getElementById('statusText').className = "text-orange-600 font-medium mt-1";
             document.getElementById('fallbackUpload').style.display = 'flex';
         }
 
-        document.getElementById('csvFileInput').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            document.getElementById('statusText').innerText = "Уншиж байна...";
-            Papa.parse(file, {
-                header: true, skipEmptyLines: true,
-                transformHeader: function(h) { return h.trim(); }, // Зайг устгах
-                complete: function(results) {
-                    globalRawData = results.data;
-                    document.getElementById('statusText').innerText = "✅ Файлаас амжилттай уншлаа! (Local)";
-                    document.getElementById('statusText').classList.replace('text-orange-600', 'text-green-600');
-                    initializeDashboard();
+        document.getElementById('csvFileInput').addEventListener('change', e => {
+            if(!e.target.files[0]) return;
+            Papa.parse(e.target.files[0], {
+                header: true, skipEmptyLines: true, transformHeader: h => h.trim(),
+                complete: res => {
+                    globalRawData = res.data;
+                    document.getElementById('statusText').innerText = "✅ Файлаас уншлаа! (Local)";
+                    document.getElementById('statusText').className = "text-green-600 font-medium mt-1";
+                    initDash();
                 }
             });
         });
 
-        function initializeDashboard() {
-            populateDistrictDropdown();
-            applyFilters(); 
+        function initDash() {
+            let dSet = new Set();
+            globalRawData.forEach(r => { let d=r['user[district_name]']; if(d && d!=='error' && d!=='Тодорхойгүй') dSet.add(d); });
+            let sel = document.getElementById('filterDistrict'); sel.innerHTML='<option value="all">Бүх дүүрэг</option>';
+            Array.from(dSet).sort().forEach(d => sel.appendChild(new Option(d, d)));
+            applyFilters();
             document.getElementById('kpiCards').style.display = 'grid';
             document.getElementById('filterSection').style.display = 'flex';
         }
 
-        function openTab(tabId, element) {
-            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            document.getElementById(tabId).classList.add('active');
-            element.classList.add('active');
+        function openTab(id, el) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(id).classList.add('active'); el.classList.add('active');
         }
 
         function exportPDF() {
-            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('print-show-all'));
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.add('print-show-all'));
             window.print();
-            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('print-show-all'));
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('print-show-all'));
         }
 
-        function parseNum(str) { if (!str) return 0; return parseFloat(str.toString().replace(/,/g, '').trim()) || 0; }
-        function formatMoney(num) { return new Intl.NumberFormat('mn-MN').format(num) + ' ₮'; }
-
-        function populateDistrictDropdown() {
-            const districtSet = new Set();
-            globalRawData.forEach(row => {
-                let dist = row['user[district_name]'];
-                if (dist && dist !== 'error' && dist !== 'Тодорхойгүй') districtSet.add(dist);
-            });
-            const select = document.getElementById('filterDistrict');
-            select.innerHTML = '<option value="all">Бүх дүүрэг</option>';
-            Array.from(districtSet).sort().forEach(dist => { select.appendChild(new Option(dist, dist)); });
-        }
+        function pN(str) { return parseFloat((str||'').toString().replace(/,/g, '').trim()) || 0; }
+        function fM(num) { return new Intl.NumberFormat('mn-MN').format(num) + ' ₮'; }
 
         function applyFilters() {
-            let fGender = document.getElementById('filterGender').value;
-            let fAge = document.getElementById('filterAge').value;
-            let fDist = document.getElementById('filterDistrict').value;
-
-            let filteredData = globalRawData.filter(row => {
-                let rGen = (row['user[gender]'] || '').toLowerCase();
-                let rAge = row['user[Age Range]'] || '';
-                let rDist = row['user[district_name]'] || '';
-                if (fGender !== 'all' && rGen !== fGender && rGen !== (fGender==='male'?'эр':'эм')) return false;
-                if (fAge !== 'all' && rAge !== fAge) return false;
-                if (fDist !== 'all' && rDist !== fDist) return false;
-                return true;
+            let fg=document.getElementById('filterGender').value, fa=document.getElementById('filterAge').value, fd=document.getElementById('filterDistrict').value;
+            let fData = globalRawData.filter(r => {
+                let g=(r['user[gender]']||'').toLowerCase(), a=r['user[Age Range]']||'', d=r['user[district_name]']||'';
+                if(fg!=='all' && g!==fg && g!==(fg==='male'?'эр':'эм')) return false;
+                if(fa!=='all' && a!==fa) return false;
+                if(fd!=='all' && d!==fd) return false; return true;
             });
-
-            document.getElementById('filteredCountText').innerText = `Шүүгдсэн: ${filteredData.length} харилцагч`;
-            processAdvancedData(filteredData, false);
+            document.getElementById('filteredCountText').innerText = `Шүүгдсэн: ${fData.length}`;
+            procData(fData, false);
         }
 
-        const ageOrder = ['18-24', '25-29', '30-34', '35-39', '40-44', '45-49', '50-54', '55-59', '60+', 'Тодорхойгүй'];
-        const scoreOrder = ['<500', '500-650', '650-800', '800+', 'Тодорхойгүй']; 
-        function sortObj(obj, order) { const s = {}; order.forEach(k => { if(obj[k] !== undefined) s[k] = obj[k]; }); Object.keys(obj).forEach(k => { if(!s.hasOwnProperty(k)) s[k] = obj[k]; }); return s; }
-        function sortInc(obj) { return Object.keys(obj).sort((a,b) => (parseInt(a.replace(/\D/g,''))||0) - (parseInt(b.replace(/\D/g,''))||0)).reduce((acc,k) => { acc[k] = obj[k]; return acc; }, {}); }
+        const aOrd = ['18-24','25-29','30-34','35-39','40-44','45-49','50-54','55-59','60+','Тодорхойгүй'];
+        const sOrd = ['<500','500-650','650-800','800+','Тодорхойгүй']; 
+        function sObj(o, ord) { let s={}; ord.forEach(k=>{if(o[k]!==undefined)s[k]=o[k];}); Object.keys(o).forEach(k=>{if(!s.hasOwnProperty(k))s[k]=o[k];}); return s; }
+        function sInc(o) { return Object.keys(o).sort((a,b)=>(parseInt(a.replace(/\D/g,''))||0)-(parseInt(b.replace(/\D/g,''))||0)).reduce((ac,k)=>{ac[k]=o[k];return ac;},{}); }
 
-        function processAdvancedData(data, isVip = false) {
-            let tInc=0, tLoan=0, vRec=0, sData=[], time={}, tLSum={}, tLCnt={};
-            let ageG={}, incC={}, scoC={}, indC={}, distC={}, lAgeSum={}, lAgeCnt={}, sAgeSum={}, sAgeCnt={};
-            let outInc={}, hOut=0, nOut=0, sUp=0, sDn=0, sSame=0, iLSum={}, iLCnt={};
-            let dtiC = { '0% (Өргүй)': 0, '<20%': 0, '20-40%': 0, '40-60%': 0, '>60%': 0 }, indSDrp = {}, tData = [];
+        function procData(data, isV) {
+            let tInc=0, tLoan=0, vRec=0, sData=[], time={}, tLSum={}, tLCnt={}, ageG={}, incC={}, scoC={}, indC={}, distC={}, lAgeSum={}, lAgeCnt={}, sAgeSum={}, sAgeCnt={};
+            let outInc={}, hOut=0, nOut=0, sUp=0, sDn=0, sSame=0, iLSum={}, iLCnt={}, dtiC = {'0% (Өргүй)':0,'<20%':0,'20-40%':0,'40-60%':0,'>60%':0}, indSDrp={}, tData=[];
 
             data.forEach(r => {
-                // transformHeader ажилласан тул зайн асуудалгүй болсон
-                let inc=parseNum(r['user[income]']), loan=parseNum(r['user[loan_limit]']), age=r['user[Age Range]']||'Тодорхойгүй';
-                let out=parseNum(r['user[outstanding]']), ind=r['user[Industry_category]']||'Тодорхойгүй';
+                let inc=pN(r['user[income]']), loan=pN(r['user[loan_limit]']), age=r['user[Age Range]']||'Тодорхойгүй';
+                let out=pN(r['user[outstanding]']), ind=r['user[Industry_category]']||'Тодорхойгүй';
                 let lSco=parseInt(r['user[initial_score_latest]']), iSco=parseInt(r['user[initial_score_max]']);
                 
-                if(!isVip) tData.push({ row: r, id: r['user[user_id]']||'-', ag: `${age} / ${r['user[gender]']||'-'}`, dist: r['user[district_name]']||'-', inc: inc, loan: loan, out: out, sco: isNaN(lSco)?'-':lSco });
+                if(!isV) tData.push({ row:r, id:r['user[user_id]']||'-', ag:`${age} / ${r['user[gender]']||'-'}`, dist:r['user[district_name]']||'-', inc:inc, loan:loan, out:out, sco:isNaN(lSco)?'-':lSco });
 
-                if(inc>0 && loan>0) { tInc+=inc; tLoan+=loan; vRec++; if(inc<100000000 && loan<100000000) sData.push({x: inc/1000000, y: loan/1000000}); }
+                if(inc>0 && loan>0) { tInc+=inc; tLoan+=loan; vRec++; if(inc<100000000 && loan<100000000) sData.push({x:inc/1000000, y:loan/1000000}); }
                 if(inc>0) { let dR=(out/inc)*100; if(out===0) dtiC['0% (Өргүй)']++; else if(dR<=20) dtiC['<20%']++; else if(dR<=40) dtiC['20-40%']++; else if(dR<=60) dtiC['40-60%']++; else dtiC['>60%']++; }
 
-                let dt = r['user[product_approved_min_date]']; if(dt) { let d=new Date(dt); if(!isNaN(d)){ let m=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; time[m]=(time[m]||0)+1; if(loan>0){ tLSum[m]=(tLSum[m]||0)+loan; tLCnt[m]=(tLCnt[m]||0)+1; } } }
-                
+                let dt=r['user[product_approved_min_date]']; if(dt){let d=new Date(dt); if(!isNaN(d)){let m=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; time[m]=(time[m]||0)+1; if(loan>0){tLSum[m]=(tLSum[m]||0)+loan; tLCnt[m]=(tLCnt[m]||0)+1;}}}
                 let gen=(r['user[gender]']||'').toLowerCase(); if(!ageG[age]) ageG[age]={m:0,f:0}; if(gen==='male'||gen==='эр') ageG[age].m++; else ageG[age].f++;
                 let iR=r['user[Income Range]']||'Тодорхойгүй'; incC[iR]=(incC[iR]||0)+1; scoC[r['user[Sore Range]']||r['user[Score Range latest]']||'Тодорхойгүй']=(scoC[r['user[Sore Range]']||r['user[Score Range latest]']||'Тодорхойгүй']||0)+1;
                 
-                if(ind && ind!=='error') { indC[ind]=(indC[ind]||0)+1; if(loan>0){ iLSum[ind]=(iLSum[ind]||0)+loan; iLCnt[ind]=(iLCnt[ind]||0)+1; } }
+                if(ind && ind!=='error') { indC[ind]=(indC[ind]||0)+1; if(loan>0){iLSum[ind]=(iLSum[ind]||0)+loan; iLCnt[ind]=(iLCnt[ind]||0)+1;} }
                 let dst=r['user[district_name]']||'Тодорхойгүй'; if(dst && dst!=='error') distC[dst]=(distC[dst]||0)+1;
                 if(loan>0 && age!=='Тодорхойгүй') { lAgeSum[age]=(lAgeSum[age]||0)+loan; lAgeCnt[age]=(lAgeCnt[age]||0)+1; }
                 if(!isNaN(lSco) && lSco>0 && age!=='Тодорхойгүй') { sAgeSum[age]=(sAgeSum[age]||0)+lSco; sAgeCnt[age]=(sAgeCnt[age]||0)+1; }
                 if(out>0) { outInc[iR]=(outInc[iR]||0)+1; hOut++; } else nOut++;
-                if(!isNaN(lSco) && !isNaN(iSco)) { if(lSco>iSco) sUp++; else if(lSco<iSco){ sDn++; if(ind && ind!=='error') indSDrp[ind]=(indSDrp[ind]||0)+1; } else sSame++; }
+                if(!isNaN(lSco) && !isNaN(iSco)) { if(lSco>iSco) sUp++; else if(lSco<iSco){sDn++; if(ind&&ind!=='error') indSDrp[ind]=(indSDrp[ind]||0)+1;} else sSame++; }
             });
 
-            if(!isVip) {
-                document.getElementById('kpiTotal').innerText = data.length; document.getElementById('kpiAvgIncome').innerText = vRec ? formatMoney(tInc/vRec) : '0'; document.getElementById('kpiAvgLoan').innerText = vRec ? formatMoney(tLoan/vRec) : '0';
+            if(!isV) {
+                document.getElementById('kpiTotal').innerText = data.length; document.getElementById('kpiAvgIncome').innerText = vRec ? fM(tInc/vRec) : '0'; document.getElementById('kpiAvgLoan').innerText = vRec ? fM(tLoan/vRec) : '0';
                 tData.sort((a,b)=>b.loan-a.loan); const tb = document.getElementById('dataTableBody'); tb.innerHTML='';
-                tData.slice(0,50).forEach(r => { let tr = document.createElement('tr'); tr.className="hover:bg-gray-50"; tr.innerHTML=`<td class="px-4 py-2 font-medium">${r.id}</td><td class="px-4 py-2">${r.ag}</td><td class="px-4 py-2">${r.dist}</td><td class="px-4 py-2 text-right">${formatMoney(r.inc)}</td><td class="px-4 py-2 text-right font-bold text-blue-600">${formatMoney(r.loan)}</td><td class="px-4 py-2 text-right text-red-500">${formatMoney(r.out)}</td><td class="px-4 py-2 font-semibold">${r.sco}</td>`; tb.appendChild(tr); });
+                tData.slice(0,50).forEach(r => { tb.innerHTML+=`<tr class="hover:bg-gray-50"><td class="px-4 py-2">${r.id}</td><td class="px-4 py-2">${r.ag}</td><td class="px-4 py-2">${r.dist}</td><td class="px-4 py-2 text-right">${fM(r.inc)}</td><td class="px-4 py-2 text-right font-bold text-blue-600">${fM(r.loan)}</td><td class="px-4 py-2 text-right text-red-500">${fM(r.out)}</td><td class="px-4 py-2">${r.sco}</td></tr>`; });
             }
 
-            let pre = isVip ? 'vip_' : ''; let clr = isVip ? ['#4f46e5','#818cf8'] : ['#10b981','#34d399'];
-            let aL={}, aS={}, aLI={}, aLT={}; 
-            ageOrder.forEach(a => { if(lAgeCnt[a]) aL[a]=lAgeSum[a]/lAgeCnt[a]/1000000; if(sAgeCnt[a]) aS[a]=Math.round(sAgeSum[a]/sAgeCnt[a]); });
+            let p=isV?'vip_':'', cl=isV?['#4f46e5','#818cf8']:['#10b981','#34d399'], aL={}, aS={}, aLI={}, aLT={}; 
+            aOrd.forEach(a => { if(lAgeCnt[a]) aL[a]=lAgeSum[a]/lAgeCnt[a]/1000000; if(sAgeCnt[a]) aS[a]=Math.round(sAgeSum[a]/sAgeCnt[a]); });
             Object.keys(iLSum).forEach(k => aLI[k]=iLSum[k]/iLCnt[k]/1000000); Object.keys(tLSum).forEach(k => aLT[k]=tLSum[k]/tLCnt[k]/1000000);
             
-            drawSc(pre+'scatterChart', sData, isVip); drawLn(pre+'trendChart', sortObj(time,Object.keys(time).sort()), isVip?'#4f46e5':'#ef4444', isVip?'rgba(79,70,229,0.1)':'rgba(239,68,68,0.1)');
-            drawSt(pre+'ageGenderChart', sortObj(ageG,ageOrder), isVip); drawBr(pre+'incomeChart', sortInc(incC), clr); drawBr(pre+'scoreChart', sortObj(scoC,scoreOrder), isVip?['#6366f1']:['#8b5cf6']);
-            drawBr(pre+'industryChart', Object.fromEntries(Object.entries(indC).sort((a,b)=>b[1]-a[1]).slice(0,10)), isVip?['#4338ca']:['#f59e0b'], true); drawDg(pre+'districtChart', Object.fromEntries(Object.entries(distC).sort((a,b)=>b[1]-a[1]).slice(0,8)));
-            drawLn(pre+'loanByAgeChart', aL, isVip?'#6366f1':'#3b82f6', isVip?'rgba(99,102,241,0.2)':'rgba(59,130,246,0.2)'); drawBr(pre+'scoreByAgeChart', aS, isVip?['#818cf8']:['#14b8a6']); drawBr(pre+'outstandingChart', sortInc(outInc), isVip?['#c026d3']:['#f43f5e']);
-            drawPi(pre+'hasOutstandingChart', {'Идэвхтэй зээлтэй':hOut, 'Үлдэгдэлгүй':nOut}, isVip?['#7c3aed','#e5e7eb']:['#f97316','#e5e7eb']); drawPi(pre+'scoreChangeChart', {'Оноо өссөн':sUp, 'Буурсан':sDn, 'Хэвээрээ':sSame}, ['#10b981','#ef4444','#cbd5e1']);
-            drawBr(pre+'industryAvgLoanChart', Object.fromEntries(Object.entries(aLI).sort((a,b)=>b[1]-a[1]).slice(0,10)), isVip?['#312e81']:['#6366f1'], true); drawLn(pre+'timelineAvgLoanChart', aLT, isVip?'#4f46e5':'#8b5cf6', isVip?'rgba(79,70,229,0.2)':'rgba(139,92,246,0.2)');
-            drawTr(pre+'treemapChart', indC); drawBr(pre+'dtiChart', dtiC, isVip?['#db2777']:['#ef4444'], false); drawBr(pre+'riskIndustryChart', Object.fromEntries(Object.entries(indSDrp).sort((a,b)=>b[1]-a[1]).slice(0,10)), isVip?['#9d174d']:['#b91c1c'], true);
+            dSc(p+'scatterChart', sData, isV); dLn(p+'trendChart', sObj(time,Object.keys(time).sort()), isV?'#4f46e5':'#ef4444', isV?'rgba(79,70,229,0.1)':'rgba(239,68,68,0.1)');
+            dSt(p+'ageGenderChart', sObj(ageG,aOrd), isV); dBr(p+'incomeChart', sInc(incC), cl); dBr(p+'scoreChart', sObj(scoC,sOrd), isV?['#6366f1']:['#8b5cf6']);
+            dBr(p+'industryChart', Object.fromEntries(Object.entries(indC).sort((a,b)=>b[1]-a[1]).slice(0,10)), isV?['#4338ca']:['#f59e0b'], true); dDg(p+'districtChart', Object.fromEntries(Object.entries(distC).sort((a,b)=>b[1]-a[1]).slice(0,8)));
+            dLn(p+'loanByAgeChart', aL, isV?'#6366f1':'#3b82f6', isV?'rgba(99,102,241,0.2)':'rgba(59,130,246,0.2)'); dBr(p+'scoreByAgeChart', aS, isV?['#818cf8']:['#14b8a6']); dBr(p+'outstandingChart', sInc(outInc), isV?['#c026d3']:['#f43f5e']);
+            dPi(p+'hasOutstandingChart', {'Зээлтэй':hOut, 'Үлдэгдэлгүй':nOut}, isV?['#7c3aed','#e5e7eb']:['#f97316','#e5e7eb']); dPi(p+'scoreChangeChart', {'Өссөн':sUp, 'Буурсан':sDn, 'Хэвээрээ':sSame}, ['#10b981','#ef4444','#cbd5e1']);
+            dBr(p+'industryAvgLoanChart', Object.fromEntries(Object.entries(aLI).sort((a,b)=>b[1]-a[1]).slice(0,10)), isV?['#312e81']:['#6366f1'], true); dLn(p+'timelineAvgLoanChart', aLT, isV?'#4f46e5':'#8b5cf6', isV?'rgba(79,70,229,0.2)':'rgba(139,92,246,0.2)');
+            dTr(p+'treemapChart', indC); dBr(p+'dtiChart', dtiC, isV?['#db2777']:['#ef4444'], false); dBr(p+'riskIndustryChart', Object.fromEntries(Object.entries(indSDrp).sort((a,b)=>b[1]-a[1]).slice(0,10)), isV?['#9d174d']:['#b91c1c'], true);
 
-            // VIP хүмүүсийн графикийг зурна
-            if(!isVip && tData.length > 0) processAdvancedData(tData.slice(0,50).map(i=>i.row), true);
+            if(!isV && tData.length > 0) procData(tData.slice(0,50).map(i=>i.row), true);
         }
 
-        function dest(id) { if(charts[id]) charts[id].destroy(); }
-        function drawSc(id, d, v) { let e=document.getElementById(id); if(!e)return; dest(id); charts[id]=new Chart(e.getContext('2d'),{type:'scatter',data:{datasets:[{label:'Орлого vs Зээл',data:d,backgroundColor:v?'rgba(79,70,229,0.5)':'rgba(59,130,246,0.5)',borderColor:v?'#4f46e5':'#3b82f6'}]},options:{responsive:true,maintainAspectRatio:false}}); }
-        function drawLn(id, d, cL, cB) { let e=document.getElementById(id); if(!e)return; dest(id); charts[id]=new Chart(e.getContext('2d'),{type:'line',data:{labels:Object.keys(d),datasets:[{label:'Утга',data:Object.values(d),borderColor:cL,backgroundColor:cB,fill:true,tension:0.4}]},options:{responsive:true,maintainAspectRatio:false}}); }
-        function drawSt(id, d, v) { let e=document.getElementById(id); if(!e)return; dest(id); let l=Object.keys(d); charts[id]=new Chart(e.getContext('2d'),{type:'bar',data:{labels:l,datasets:[{label:'Эм',data:l.map(k=>d[k].f),backgroundColor:v?'#d946ef':'#ec4899'},{label:'Эр',data:l.map(k=>d[k].m),backgroundColor:v?'#6366f1':'#3b82f6'}]},options:{responsive:true,maintainAspectRatio:false,scales:{x:{stacked:true},y:{stacked:true}}}}); }
-        function drawBr(id, d, c, hz=false) { let e=document.getElementById(id); if(!e)return; dest(id); charts[id]=new Chart(e.getContext('2d'),{type:'bar',data:{labels:Object.keys(d),datasets:[{label:'Утга',data:Object.values(d),backgroundColor:c[0],borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:hz?'y':'x',plugins:{legend:{display:false}},scales:hz?{y:{ticks:{callback:v=>{let l=charts[id].data.labels[v]||'';return l.length>25?l.substring(0,25)+'...':l;}}}}:{} }}); }
-        function drawDg(id, d) { let e=document.getElementById(id); if(!e)return; dest(id); charts[id]=new Chart(e.getContext('2d'),{type:'doughnut',data:{labels:Object.keys(d),datasets:[{data:Object.values(d),backgroundColor:['#3b82f6','#10b981','#f59e0b','#ef4444','#8b5cf6','#ec4899','#6366f1','#14b8a6']}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right'}}}}); }
-        function drawPi(id, d, c) { let e=document.getElementById(id); if(!e)return; dest(id); charts[id]=new Chart(e.getContext('2d'),{type:'pie',data:{labels:Object.keys(d),datasets:[{data:Object.values(d),backgroundColor:c}]},options:{responsive:true,maintainAspectRatio:false}}); }
-        function drawTr(id, d) { let e=document.getElementById(id); if(!e)return; dest(id); let tr=[]; for(let i in d){if(i!=='Тодорхойгүй'&&i!=='error'&&d[i]>0)tr.push({ind:i,v:d[i]});} charts[id]=new Chart(e.getContext('2d'),{type:'treemap',data:{datasets:[{tree:tr,key:'v',groups:['ind'],borderWidth:1,borderColor:'#fff',backgroundColor:c=>['#3b82f6','#10b981','#f59e0b','#ef4444','#8b5cf6','#ec4899'][c.dataIndex%6]||'#ccc',labels:{display:true,align:'center',color:'#fff',font:{size:12,weight:'bold'},formatter:c=>{let l=c.raw._data.ind;return [l.length>25?l.substring(0,25)+'...':l, c.raw.v];}}}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}}); }
+        function dst(id){if(charts[id])charts[id].destroy();}
+        function dSc(id,d,v){let e=document.getElementById(id);if(!e)return;dst(id); charts[id]=new Chart(e,{type:'scatter',data:{datasets:[{label:'Сая ₮',data:d,backgroundColor:v?'rgba(79,70,229,0.5)':'rgba(59,130,246,0.5)',borderColor:v?'#4f46e5':'#3b82f6'}]},options:{responsive:true,maintainAspectRatio:false}});}
+        function dLn(id,d,cL,cB){let e=document.getElementById(id);if(!e)return;dst(id); charts[id]=new Chart(e,{type:'line',data:{labels:Object.keys(d),datasets:[{label:'Утга',data:Object.values(d),borderColor:cL,backgroundColor:cB,fill:true,tension:0.4}]},options:{responsive:true,maintainAspectRatio:false}});}
+        function dSt(id,d,v){let e=document.getElementById(id);if(!e)return;dst(id); let l=Object.keys(d); charts[id]=new Chart(e,{type:'bar',data:{labels:l,datasets:[{label:'Эм',data:l.map(k=>d[k].f),backgroundColor:v?'#d946ef':'#ec4899'},{label:'Эр',data:l.map(k=>d[k].m),backgroundColor:v?'#6366f1':'#3b82f6'}]},options:{responsive:true,maintainAspectRatio:false,scales:{x:{stacked:true},y:{stacked:true}}}});}
+        function dBr(id,d,c,hz=false){let e=document.getElementById(id);if(!e)return;dst(id); charts[id]=new Chart(e,{type:'bar',data:{labels:Object.keys(d),datasets:[{label:'Тоо',data:Object.values(d),backgroundColor:c[0],borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:hz?'y':'x',plugins:{legend:{display:false}},scales:hz?{y:{ticks:{callback:v=>{let l=charts[id].data.labels[v]||'';return l.length>25?l.substring(0,25)+'...':l;}}}}:{} }});}
+        function dDg(id,d){let e=document.getElementById(id);if(!e)return;dst(id); charts[id]=new Chart(e,{type:'doughnut',data:{labels:Object.keys(d),datasets:[{data:Object.values(d),backgroundColor:['#3b82f6','#10b981','#f59e0b','#ef4444','#8b5cf6','#ec4899','#6366f1','#14b8a6']}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right'}}}});}
+        function dPi(id,d,c){let e=document.getElementById(id);if(!e)return;dst(id); charts[id]=new Chart(e,{type:'pie',data:{labels:Object.keys(d),datasets:[{data:Object.values(d),backgroundColor:c}]},options:{responsive:true,maintainAspectRatio:false}});}
+        function dTr(id,d){let e=document.getElementById(id);if(!e)return;dst(id); let tr=[]; for(let i in d){if(i!=='Тодорхойгүй'&&i!=='error'&&d[i]>0)tr.push({ind:i,v:d[i]});} charts[id]=new Chart(e,{type:'treemap',data:{datasets:[{tree:tr,key:'v',groups:['ind'],borderWidth:1,borderColor:'#fff',backgroundColor:c=>['#3b82f6','#10b981','#f59e0b','#ef4444','#8b5cf6','#ec4899'][c.dataIndex%6]||'#ccc',labels:{display:true,color:'#fff',font:{weight:'bold'},formatter:c=>{let l=c.raw._data.ind;return [l.length>25?l.substring(0,25)+'...':l, c.raw.v];}}}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}});}
     </script>
 </body>
 </html>
